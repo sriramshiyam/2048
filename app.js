@@ -36,17 +36,19 @@ Array.from(divs).forEach((div, i) => {
 
 function insert() {
   let F = 0;
-  Array.from(divs).forEach((div, i) => {
-    if (Math.round(Math.random() * 1) === 0 && F < 1 && !div.firstChild) {
-      F += 1;
-      let span = document.createElement("span");
-      span.innerText = Math.round(Math.random() * 1) === 1 ? "2" : "4";
-      span.style.backgroundColor = colors[Number(span.innerText)];
-      span.style.transform = "scale(0)";
-      setTimeout(() => (span.style.transform = "scale(1)"), 200);
-      div.appendChild(span);
-    }
-  });
+  while (F < 1) {
+    Array.from(divs).forEach((div, i) => {
+      if (Math.round(Math.random() * 1) === 0 && F < 1 && !div.firstChild) {
+        F += 1;
+        let span = document.createElement("span");
+        span.innerText = Math.round(Math.random() * 1) === 1 ? "2" : "4";
+        span.style.backgroundColor = colors[Number(span.innerText)];
+        span.style.transform = "scale(0)";
+        setTimeout(() => (span.style.transform = "scale(1)"), 200);
+        div.appendChild(span);
+      }
+    });
+  }
 }
 
 class Tiles {
@@ -59,6 +61,7 @@ class Tiles {
   static N_ = [0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3];
   static M_ = [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3];
   static moded = [];
+  static moved = [];
 
   move() {
     if (this.e.key === "ArrowRight") {
@@ -123,14 +126,16 @@ class Tiles {
     this.div.removeChild(this.span);
     let span = document.createElement("span");
     span.innerText = this.span.innerText;
+    if (N) {
+      Tiles.moved.push(1);
+    }
     if (!add) {
       span.style.backgroundColor = colors[Number(span.innerText)];
       divs[i + N].appendChild(span);
     } else {
-      setTimeout(
-        () => (divs[i + N].firstChild.style.transform = "scale(1.2)"),
-        200
-      );
+      setTimeout(() => {
+        divs[i + N].firstChild.style.transform = "scale(1.2)";
+      }, 200);
       setTimeout(
         () => (divs[i + N].firstChild.style.transform = "scale(1)"),
         500
@@ -192,6 +197,9 @@ class Tiles {
     let span = document.createElement("span");
     span.innerText = this.span.innerText;
     span.style.backgroundColor = colors[Number(span.innerText)];
+    if (N) {
+      Tiles.moved.push(1);
+    }
     if (!add) {
       span.style.backgroundColor = colors[Number(span.innerText)];
       divs[i + 4 * N].appendChild(span);
@@ -211,27 +219,40 @@ class Tiles {
   }
 }
 
+let canmove = true;
+
 window.onkeydown = (e) => {
-  Tiles.moded.length = 0;
-  if (e.key === "ArrowRight" || e.key === "ArrowDown") {
-    for (let index = divs.length - 1; index >= 0; index--) {
-      const div = divs[index];
-      setTimeout(() => {
-        if (div.firstChild) {
-          let tile = new Tiles(e, div.firstChild, index, div);
-          tile.move();
-        }
-      }, 100);
+  if (canmove) {
+    Tiles.moded.length = 0;
+    Tiles.moved.length = 0;
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      for (let index = divs.length - 1; index >= 0; index--) {
+        const div = divs[index];
+        setTimeout(() => {
+          if (div.firstChild) {
+            let tile = new Tiles(e, div.firstChild, index, div);
+            tile.move();
+          }
+        }, 100);
+      }
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      divs.forEach((div, i) => {
+        setTimeout(() => {
+          if (div.firstChild) {
+            let tile = new Tiles(e, div.firstChild, i, div);
+            tile.move();
+          }
+        }, 100);
+      });
     }
-  } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
-    divs.forEach((div, i) => {
-      setTimeout(() => {
-        if (div.firstChild) {
-          let tile = new Tiles(e, div.firstChild, i, div);
-          tile.move();
-        }
-      }, 100);
-    });
+    setTimeout(() => {
+      if (Tiles.moved.length > 0) {
+        insert();
+      }
+    }, 200);
+    canmove = false;
+    setTimeout(() => {
+      canmove = true;
+    }, 500);
   }
-  setTimeout(() => insert(), 200);
 };
