@@ -1,3 +1,8 @@
+html,
+body {
+  overscroll-behavior-y: contain;
+}
+
 body {
   height: 100vh;
   width: 100%;
@@ -17,30 +22,39 @@ h1 {
   display: grid;
   height: 600px;
   width: 600px;
+  max-width: 89vw;
+  max-height: 89vw;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(4, 1fr);
   gap: 20px;
   background-color: #bbada0;
   padding: 20px;
   border-radius: 10px;
+  box-sizing: border-box;
 }
 
 .tiles div {
+  box-sizing: border-box;
   position: relative;
   background-color: #ccc1b4;
   border-radius: 10px;
   text-align: center;
-  line-height: 125px;
 }
 
 .tiles div span {
-  display: block;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   height: 100%;
   width: 100%;
   color: white;
   font-size: 50px;
   border-radius: 10px;
   transition: all 0.3s;
+}
+
+.tiles div span::selection {
+  display: none;
 }
 
 section {
@@ -52,4 +66,14 @@ section {
   background-color: rgba(255, 255, 255, 0.5);
   opacity: 0;
   border-radius: 10px;
+}
+
+@media screen and (max-width: 600px) {
+  .tiles div span {
+    font-size: 20px;
+  }
+  .tiles {
+    gap: 10px;
+    padding: 10px;
+  }
 }
