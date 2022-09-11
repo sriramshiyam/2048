@@ -13,6 +13,7 @@ let colors = {
 };
 
 let tiles = document.querySelector(".tiles");
+let mobile = false;
 
 for (let index = 0; index < 16; index++) {
   let div = document.createElement("div");
@@ -63,7 +64,7 @@ class Tiles {
   static moded = [];
   static moved = [];
 
-  move() {
+  move(side = "default") {
     if (this.e.key === "ArrowRight") {
       this.insertandremove1(this.i, 1);
     } else if (this.e.key === "ArrowLeft") {
@@ -71,6 +72,15 @@ class Tiles {
     } else if (this.e.key === "ArrowUp") {
       this.insertandremove2(this.i, -1);
     } else if (this.e.key === "ArrowDown") {
+      this.insertandremove2(this.i, 1);
+    }
+    if (side === "right") {
+      this.insertandremove1(this.i, 1);
+    } else if (side === "left") {
+      this.insertandremove1(this.i, -1);
+    } else if (side === "up") {
+      this.insertandremove2(this.i, -1);
+    } else if (side === "down") {
       this.insertandremove2(this.i, 1);
     }
   }
@@ -256,3 +266,74 @@ window.onkeydown = (e) => {
     }, 500);
   }
 };
+
+let xStart = 0;
+let yStart = 0;
+let xFinish = 0;
+let yFinish = 0;
+
+document.addEventListener("touchstart", (e) => {
+  mobile = true;
+  console.log("start");
+  [...e.changedTouches].forEach((touch) => {
+    xStart = touch.pageX;
+    yStart = touch.pageY;
+    // console.log(touch.pageX);
+    // console.log(touch.pageY);
+  });
+});
+// document.addEventListener("touchmove", (e) => {
+//   console.log("move");
+// });
+
+document.addEventListener("touchend", (e) => {
+  console.log("end");
+
+  [...e.changedTouches].forEach((touch) => {
+    xFinish = touch.pageX;
+    yFinish = touch.pageY;
+    // console.log(touch.pageX);
+    // console.log(touch.pageY);
+  });
+  // console.log("right");
+  let right = Math.abs(xStart - xFinish) > 70 && xFinish > xStart;
+  // console.log("down");
+  let down = Math.abs(yStart - yFinish) > 70 && yFinish > yStart;
+  // console.log("left");
+  let left = Math.abs(xFinish - xStart) > 70 && xFinish < xStart;
+  // console.log("up");
+  let up = Math.abs(yFinish - yStart) > 70 && yFinish < yStart;
+  if (canmove) {
+    Tiles.moded.length = 0;
+    Tiles.moved.length = 0;
+    if (right || down) {
+      for (let index = divs.length - 1; index >= 0; index--) {
+        const div = divs[index];
+        setTimeout(() => {
+          if (div.firstChild) {
+            let tile = new Tiles(e, div.firstChild, index, div);
+            tile.move(right ? "right" : "down");
+          }
+        }, 100);
+      }
+    } else if (left || up) {
+      divs.forEach((div, i) => {
+        setTimeout(() => {
+          if (div.firstChild) {
+            let tile = new Tiles(e, div.firstChild, i, div);
+            tile.move(left ? "left" : "up");
+          }
+        }, 100);
+      });
+    }
+    setTimeout(() => {
+      if (Tiles.moved.length > 0) {
+        insert();
+      }
+    }, 200);
+    canmove = false;
+    setTimeout(() => {
+      canmove = true;
+    }, 500);
+  }
+});
